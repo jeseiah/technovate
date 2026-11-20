@@ -82,10 +82,7 @@
       background: #0b1220;
     }
 
-    #reader video {
-      border-radius: 12px;
-    }
-
+    #reader video,
     #reader img {
       border-radius: 12px;
     }
@@ -214,6 +211,7 @@
     const resultBox = document.getElementById('result');
     const startButton = document.getElementById('startButton');
 
+    // Display a result message
     function showResult(type, title, message) {
       resultBox.className = type;
       resultBox.replaceChildren();
@@ -227,8 +225,19 @@
       resultBox.append(heading, paragraph);
     }
 
+    // Completely clear the previous result
+    function clearResult() {
+      resultBox.className = '';
+      resultBox.replaceChildren();
+      resultBox.style.display = 'none';
+    }
+
+    // Start or restart the scanner
     async function startScanner() {
       if (isRunning || isProcessing) return;
+
+      // Clear the previous attendee's confirmation immediately
+      clearResult();
 
       if (!window.opener) {
         showResult(
@@ -246,10 +255,6 @@
 
         startButton.disabled = true;
         startButton.textContent = 'Opening camera...';
-
-        resultBox.className = '';
-        resultBox.replaceChildren();
-        resultBox.style.display = 'none';
 
         await scanner.start(
           { facingMode: 'environment' },
@@ -270,11 +275,13 @@
           error.name + ': ' + error.message
         );
 
+        startButton.style.display = 'block';
         startButton.disabled = false;
         startButton.textContent = 'Try Again';
       }
     }
 
+    // Handle a detected QR code
     async function onScanSuccess(decodedText) {
       if (isProcessing) return;
 
@@ -301,6 +308,7 @@
 
       } catch (error) {
         showResult('error', 'Scanner error', error.message);
+
         isProcessing = false;
         startButton.style.display = 'block';
         startButton.disabled = false;
@@ -308,6 +316,7 @@
       }
     }
 
+    // Receive the verification result from Apps Script
     window.addEventListener('message', async function(event) {
       if (event.source !== window.opener) return;
 
@@ -340,6 +349,7 @@
       }
 
       isProcessing = false;
+
       startButton.style.display = 'block';
       startButton.disabled = false;
       startButton.textContent = 'Scan Next Attendee';
