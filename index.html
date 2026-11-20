@@ -246,6 +246,9 @@
 
         startButton.disabled = true;
         startButton.textContent = 'Opening camera...';
+
+        resultBox.className = '';
+        resultBox.replaceChildren();
         resultBox.style.display = 'none';
 
         await scanner.start(
