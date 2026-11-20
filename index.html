@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ========================================================
+       PAGE CONFIGURATION
+       ======================================================== -->
+
+  <!-- Character encoding and responsive mobile viewport. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Browser tab title. -->
   <title>TECHNOVATE 2026 QR Scanner</title>
 
+  <!-- Load the html5-qrcode library for camera access and QR scanning. -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 
+  <!-- Load the Inter font used throughout the scanner interface. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+
+
+  <!-- ========================================================
+       PART 1: PAGE STYLING
+       ======================================================== -->
+
   <style>
+    /* Apply consistent sizing to all elements. */
     * {
       box-sizing: border-box;
     }
 
+    /* Main page appearance and layout. */
     body {
       font-family: 'Inter', sans-serif;
       background: #0b1220;
@@ -24,11 +40,13 @@
       padding: 20px;
       min-height: 100vh;
     }
-    
+
+    /* Make form controls use the same font as the page. */
     button, input, select, textarea {
       font-family: inherit;
     }
 
+    /* Main scanner container. */
     .container {
       max-width: 460px;
       margin: 20px auto;
@@ -40,17 +58,20 @@
       box-shadow: 0 8px 30px #00000040;
     }
 
+    /* Event branding section. */
     .header {
       padding-bottom: 18px;
       border-bottom: 1px solid #263449;
     }
 
+    /* Main event title. */
     h1 {
       font-size: 25px;
       letter-spacing: 2px;
       margin: 0;
     }
 
+    /* Event registration system label. */
     .brand {
       color: #60a5fa;
       font-size: 12px;
@@ -59,6 +80,7 @@
       margin-top: 7px;
     }
 
+    /* Label identifying the page as the organizer's scanner. */
     .scanner-label {
       display: inline-block;
       margin-top: 22px;
@@ -71,17 +93,20 @@
       letter-spacing: 1px;
     }
 
+    /* Scanner page heading. */
     h2 {
       font-size: 21px;
       margin-bottom: 8px;
     }
 
+    /* Instructions displayed below the scanner heading. */
     .subtitle {
       color: #94a3b8;
       font-size: 13px;
       line-height: 1.5;
     }
 
+    /* Camera preview area where QR codes are detected. */
     #reader {
       width: 100%;
       margin: 22px auto;
@@ -90,11 +115,13 @@
       background: #0b1220;
     }
 
+    /* Apply rounded corners to the camera preview and images. */
     #reader video,
     #reader img {
       border-radius: 12px;
     }
 
+    /* Camera start and restart button. */
     button {
       width: 100%;
       padding: 15px;
@@ -108,15 +135,18 @@
       transition: background 0.2s;
     }
 
+    /* Change button color while it is being pressed. */
     button:active {
       background: #1d4ed8;
     }
 
+    /* Indicate when the button is disabled. */
     button:disabled {
       opacity: .6;
       cursor: not-allowed;
     }
 
+    /* Container for scan results and check-in responses. */
     #result {
       display: none;
       padding: 18px;
@@ -126,17 +156,20 @@
       line-height: 1.5;
     }
 
+    /* Result heading. */
     #result h3 {
       margin-top: 0;
       margin-bottom: 8px;
       font-size: 17px;
     }
 
+    /* Result description. */
     #result p {
       margin-bottom: 0;
       font-size: 14px;
     }
 
+    /* Green result style for successful check-ins. */
     .success {
       display: block !important;
       background: #12372c;
@@ -144,6 +177,7 @@
       color: #86efac;
     }
 
+    /* Amber result style for detected or duplicate QR codes. */
     .duplicate {
       display: block !important;
       background: #3b2d13;
@@ -151,6 +185,7 @@
       color: #fcd34d;
     }
 
+    /* Red result style for errors and failed check-ins. */
     .error {
       display: block !important;
       background: #3b1c25;
@@ -158,6 +193,7 @@
       color: #fca5a5;
     }
 
+    /* Additional scanning instructions. */
     .note {
       font-size: 11px;
       color: #64748b;
@@ -165,6 +201,7 @@
       line-height: 1.6;
     }
 
+    /* Footer containing the system identification. */
     .footer {
       border-top: 1px solid #263449;
       margin-top: 20px;
@@ -173,195 +210,375 @@
       font-size: 10px;
       letter-spacing: 1px;
     }
+
   </style>
 </head>
 
 <body>
+
+  <!-- ========================================================
+       PART 2: QR SCANNER INTERFACE
+       ======================================================== -->
+
+  <!-- Main container holding the scanner interface. -->
   <div class="container">
 
+    <!-- Event branding and system identification. -->
     <div class="header">
       <h1>TECHNOVATE 2026</h1>
       <div class="brand">EVENT REGISTRATION SYSTEM</div>
     </div>
 
+    <!-- Identifies the page as the organizer's QR scanner. -->
     <div class="scanner-label">ORGANIZER SCANNER</div>
 
+    <!-- Scanner title and instructions. -->
     <h2>QR Code Scanner</h2>
 
     <p class="subtitle">
       Position the attendee's QR ticket inside the camera frame.
     </p>
 
+
+    <!-- ======================================================
+         CAMERA PREVIEW
+         ====================================================== -->
+
+    <!-- The html5-qrcode library uses this element to display the camera preview and scanning area. -->
     <div id="reader"></div>
 
+    <!-- Button used to start or restart the camera scanner. -->
     <button id="startButton" onclick="startScanner()">
       Start Camera Scanner
     </button>
 
+    <!-- Displays QR detection messages, check-in results, and any errors returned by the system. -->
     <div id="result"></div>
 
+    <!-- Additional instructions for event organizers. -->
     <p class="note">
-      Please ensure the QR code is clearly visible
-      and properly positioned within the camera frame.
+      Please ensure the QR code is clearly visible and properly positioned within the camera frame.
     </p>
 
+    <!-- Scanner footer. -->
     <div class="footer">
       TECHNOVATE 2026 • OFFICIAL CHECK-IN SYSTEM
     </div>
 
   </div>
 
+
+  <!-- ========================================================
+       PART 3: QR SCANNER LOGIC
+       ======================================================== -->
+
   <script>
+
+    // Stores the html5-qrcode scanner instance.
     let scanner = null;
+
+    // Tracks whether the camera scanner is currently running.
     let isRunning = false;
+
+    // Prevents multiple QR codes from being processed simultaneously.
     let isProcessing = false;
 
+
+    // Retrieve the HTML elements used to display results and controls.
     const resultBox = document.getElementById('result');
     const startButton = document.getElementById('startButton');
 
-    // Display a result message
+
+    /**
+     * ========================================================
+     * FUNCTION 1: DISPLAY SCAN RESULTS
+     * ========================================================
+     *
+     * Displays a message inside the result section.
+     *
+     * Parameters:
+     * type    - Determines the result's appearance:
+     *           success   = Successful check-in
+     *           duplicate = QR detected or already checked in
+     *           error     = Failed scan or system error
+     *
+     * title   - Heading displayed in the result section.
+     * message - Description of the scan or check-in result.
+     *
+     */
     function showResult(type, title, message) {
+
+      // Apply the appropriate result style.
       resultBox.className = type;
+
+      // Remove any previous result content.
       resultBox.replaceChildren();
 
+      // Create the result heading.
       const heading = document.createElement('h3');
       heading.textContent = title;
 
+      // Create the result description.
       const paragraph = document.createElement('p');
       paragraph.textContent = message;
 
+      // Add the heading and description to the result container.
       resultBox.append(heading, paragraph);
+
     }
 
-    // Completely clear the previous result
+
+    /**
+     * ========================================================
+     * FUNCTION 2: CLEAR PREVIOUS RESULTS
+     * ========================================================
+     *
+     * Removes the previous attendee's result before starting a new scanning session.
+     *
+     */
     function clearResult() {
+
+      // Remove previous result styling and content.
       resultBox.className = '';
       resultBox.replaceChildren();
+
+      // Hide the result container.
       resultBox.style.display = 'none';
+
     }
 
-    // Start or restart the scanner
+
+    /**
+     * ========================================================
+     * FUNCTION 3: START OR RESTART THE CAMERA SCANNER
+     * ========================================================
+     *
+     * Initializes the camera and starts QR code detection.
+     * Uses the device's rear-facing camera when available.
+     *
+     */
     async function startScanner() {
+
+      // Prevent starting another scanning session while the scanner is already running or processing.
       if (isRunning || isProcessing) return;
 
-      // Clear the previous attendee's confirmation immediately
+      // Clear the previous attendee's confirmation immediately.
       clearResult();
 
+
+      // Make sure the scanner was opened through the Check-in Portal.
+      // The portal is required to communicate with the Apps Script backend.
       if (!window.opener) {
+
         showResult(
           'error',
           'Connection missing',
           'Please open this scanner using the Open QR Scanner button on the TECHNOVATE check-in page.'
         );
+
         return;
       }
 
+
       try {
+
+        // Create the scanner instance if it has not been initialized.
         if (!scanner) {
           scanner = new Html5Qrcode('reader');
         }
 
+        // Temporarily disable the button while the camera starts.
         startButton.disabled = true;
         startButton.textContent = 'Opening camera...';
 
+
+        // Request camera access and begin QR code detection.
         await scanner.start(
+
+          // Prefer the device's rear-facing camera.
           { facingMode: 'environment' },
+
+          // Scanner configuration.
           {
             fps: 10,
+
+            // Defines the QR code detection area in pixels.
             qrbox: { width: 250, height: 250 }
           },
+
+          // Function called when a QR code is successfully detected.
           onScanSuccess
+
         );
 
+
+        // Update the scanner state after the camera starts.
         isRunning = true;
+
+        // Hide the start button while scanning is active.
         startButton.style.display = 'none';
 
+
       } catch (error) {
+
+        // Display an error if camera access or initialization fails.
         showResult(
           'error',
           'Camera error',
           error.name + ': ' + error.message
         );
 
+        // Restore the button so the organizer can try again.
         startButton.style.display = 'block';
         startButton.disabled = false;
         startButton.textContent = 'Try Again';
+
       }
+
     }
 
-    // Handle a detected QR code
+
+    /**
+     * ========================================================
+     * FUNCTION 4: HANDLE A DETECTED QR CODE
+     * ========================================================
+     *
+     * Called automatically when the scanner successfully reads a QR code.
+     *
+     * Parameter: decodedText - The attendee ID encoded in the QR code.
+     *
+     */
     async function onScanSuccess(decodedText) {
+
+      // Ignore additional detections while processing a scan.
       if (isProcessing) return;
 
+      // Mark the scanner as busy.
       isProcessing = true;
 
+
       try {
+
+        // Stop the camera after detecting a QR code.
+        // This prevents the same ticket from being scanned repeatedly.
         await scanner.stop();
+
         isRunning = false;
 
+
+        // Inform the organizer that the QR code was detected and is being checked against the registration database.
         showResult(
           'duplicate',
           'QR CODE DETECTED',
           'Verifying attendee with the registration database...'
         );
 
+
+        // Check whether the connection to the Check-in Portal still exists.
         if (!window.opener) {
           throw new Error('The check-in page connection was lost.');
         }
 
+
+        // Send the scanned attendee ID to the parent portal.
+        // The portal will forward it to the Apps Script backend.
         window.opener.postMessage({
+
+          // Identifies this message as a QR scan notification.
           type: 'QR_SCAN',
+
+          // Contains the ID decoded from the attendee's QR ticket.
           attendeeId: decodedText
+
         }, '*');
 
+
       } catch (error) {
+
+        // Display an error if scanning or communication fails.
         showResult('error', 'Scanner error', error.message);
 
+        // Allow another scanning attempt.
         isProcessing = false;
+
+        // Restore the scanner button.
         startButton.style.display = 'block';
         startButton.disabled = false;
         startButton.textContent = 'Try Again';
+
       }
+
     }
 
-    // Receive the verification result from Apps Script
+
+    /**
+     * ========================================================
+     * FUNCTION 5: RECEIVE CHECK-IN RESULTS
+     * ========================================================
+     *
+     * Listens for the verification result sent by the Google Apps Script Check-in Portal.
+     *
+     */
     window.addEventListener('message', async function(event) {
+
+      // Accept messages only from the parent Check-in Portal.
       if (event.source !== window.opener) return;
 
+      // Retrieve the message data.
       const data = event.data;
 
+      // Ignore messages that are not check-in results.
       if (!data || data.type !== 'CHECKIN_RESULT') return;
 
+      // Extract the check-in response from Apps Script.
       const response = data.result || {};
 
+
+      // 1. Display a green confirmation for successful check-ins.
       if (response.status === 'success') {
+
         showResult(
           'success',
           'CHECK-IN SUCCESSFUL',
           response.message + ' Attendee: ' + (response.name || '')
         );
 
+
+      // 2. Display an amber warning if the attendee was already checked in.
       } else if (response.status === 'already_checked_in') {
+
         showResult(
           'duplicate',
           'ALREADY CHECKED IN',
           response.message + ' Attendee: ' + (response.name || '')
         );
 
+
+      // 3. Display an error for invalid QR codes or other unsuccessful check-in attempts.
       } else {
+
         showResult(
           'error',
           'CHECK-IN FAILED',
           response.message || 'Unable to verify attendee.'
         );
+
       }
 
+
+      // Check-in processing is complete.
+      // The scanner can now accept another QR code.
       isProcessing = false;
 
+
+      // Restore the scanner button for the next attendee.
       startButton.style.display = 'block';
       startButton.disabled = false;
       startButton.textContent = 'Scan Next Attendee';
+
     });
+
   </script>
+  
 </body>
 </html>
